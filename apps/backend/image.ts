@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import axios from "axios";
 import * as fs from "node:fs";
 import { Storage } from "@google-cloud/storage";
+import { FRAME_GENERATION_SYSTEM_PROMPT } from "./config/prompts";
 
 const storage = new Storage({
   projectId: process.env.GCP_PROJECT,
@@ -32,6 +33,9 @@ export async function imageGeneration(
       { text: user_prompt },
       { inlineData: { mimeType: "image/png", data: base64image } },
     ],
+    config: {
+      systemInstruction: FRAME_GENERATION_SYSTEM_PROMPT
+    }
   });
 
   const imagePart = response.candidates?.[0]?.content?.parts?.find(
@@ -68,9 +72,28 @@ export async function uploadImage(
       resumable: false,
     });
 
-    const url = `https://googleapis.com{bucket.name}/${file.name}`;
+    const url = `https://googleapis.com/${process.env.IMAGE_BUCKET}/${file.name}`;
     return url;
   } catch (error) {
     console.error("Error uploading the file to s3" + error);
+  }
+}
+
+export async function getSignedUrl(fileName: string) {
+  try {
+    const options = {
+      version: "v4",
+      action: "read",
+      expires: Date.now() + 15 * 60 * 1000, // URL expires in 15 minutes
+    };
+
+    const [url] = await storage
+      .bucket(process.env.IMAGE_BUCKET!)
+      .file(fileName)
+      .getSignedUrl(options);
+
+    return url;
+  } catch (error) {
+    console.error("Error generating the signed url: " + error);
   }
 }
