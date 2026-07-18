@@ -18,6 +18,7 @@ model User{
   name          String
   password      String
   stories       Story[]
+  charecters    Charecter[]
 }
 
 model Story{
@@ -28,6 +29,7 @@ model Story{
   scenes        Scene[]
   user_id       String
   user          User          @relation(fields: [user_id], references: [id])
+  charecters    Story_Charecters[]
 }
 
 model Scene{
@@ -37,4 +39,23 @@ model Scene{
   image_url     String
   story_id      String
   story         Story         @relation(fields: [story_id],references: [id])
+}
+
+model Charecter{
+  id          String             @id      @default(uuid())
+  name        String  
+  imageUrl    String
+  user_id     String?
+  user        User?              @relation(fields: [user_id], references: [id])
+  stories     Story_Charecters[]
+}
+
+model Story_Charecters{
+  id            String         @id       @default(uuid())
+  story_id      String
+  charecter_id  String    
+  charecters    Charecter     @relation(fields: [charecter_id], references: [id])
+  stories       Story         @relation(fields: [story_id], references: [id])
+
+  @@unique([story_id, charecter_id])
 }

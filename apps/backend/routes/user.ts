@@ -1,5 +1,5 @@
 import express from "express";
-import z, { date } from "zod";
+import z from "zod";
 import { prisma } from "../db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
