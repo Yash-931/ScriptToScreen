@@ -47,6 +47,12 @@ userRouter.post("/signup", async (req, res) => {
       name: data.name,
       password: hashPassword,
     },
+    // Return only public fields, so the password hash is never read back or sent
+    select: {
+      id: true,
+      username: true,
+      name: true,
+    },
   });
 
   res.status(201).json({
